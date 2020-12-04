@@ -1,0 +1,516 @@
+#include <iostream>
+#include <algorithm>
+#include <queue>
+using namespace std;
+
+class Node {
+
+public:
+	string ID;
+	string nameID;
+	Node *left;
+	Node *right;
+	//default constructor
+	Node() : ID(""), nameID(""),left(nullptr), right(nullptr) {}
+	//constructor to initialize both name and ID
+	Node(string name,string x) : nameID(name), ID(x), left(nullptr), right(nullptr) {}
+};
+
+
+class AVL {
+	//initialize root
+	Node* root = nullptr;
+	bool successfulInsertion;
+	bool successfulDeletion;
+
+public:
+	//INSERT Functions
+	void insert(string name, string number);
+	Node* insertNode(Node* node, string final, string number);
+
+	//Name and ID check
+	bool checkName(string name);
+	bool checkID(string number);
+	string removeQuotes(string name);
+
+	//Height and Balance check
+	int heightAtNode(Node* node);
+	int getBalanceFactor(Node* node);
+	Node* balance(Node* node);
+
+	//REMOVE Functions
+	void remove(string number);
+	Node* removeNode(Node* node, string number);
+
+	//REMOVE Inorder Functions
+	void inOrder(Node* node, vector<string>& tree);
+	void removeInOrderN(int n);
+	Node* inorderSuccessor(Node* node);
+
+	//SEARCH Functions
+	void searchID(string ID);
+	void searchName(string name);
+	string findID(string key,Node* node);
+	void preOrder(string name, Node* node,vector<string>& s);
+
+	//PRINT Functions
+	void printIn();
+	void printPre();
+	void printPost();
+	void printLevel();
+
+	//Helper orders
+	void printInorder(Node* node);
+	void printPreorder(Node* node);
+	void printPostorder(Node* node);
+	void printLevelCount(Node* node);
+
+	//ROTATIONS
+	Node* rotateLeft(Node *node);
+	Node* rotateRight(Node *node);
+	Node* rotateLeftRight(Node *node);
+	Node* rotateRightLeft(Node *node);
+};
+
+void AVL::insert(string name, string number) {
+	//check validity of name and ID before inserting
+	bool validID = checkID(number);
+	string final = removeQuotes(name);
+	bool validName = checkName(final);
+
+	//only insert a new Node if ID number and name fit requirements
+	if (validName && validID) {
+		root = insertNode(root, final, number);
+		//checks for unique ID
+		if (successfulInsertion)
+			cout << "successful" << endl;
+		else {
+			cout << "unsuccessful" << endl;
+		}
+	}
+		// name and/or id not valid so cannot be inserted
+	else {
+		cout << "unsuccessful" << endl;
+	}
+}
+
+//Cite: https://stepik.org/submissions/1480362/296623565?unit=379727
+Node* AVL::insertNode(Node* node, string final, string number) {
+
+	if (node == nullptr) {
+        successfulInsertion = true;
+		return new Node(final,number);
+    }
+
+	//rotate the nodes within the insertion if necessary
+	if (number < node->ID) {
+		node->left = insertNode(node->left, final, number);
+		node = balance(node);
+	}
+	else if (number > node->ID) {
+		node->right = insertNode(node->right, final, number);
+		node = balance(node);
+	}
+	else {
+		//ID already exists so set insertion boolean to false
+		//cannot insert an ID that already exists
+		successfulInsertion = false;
+		return node;
+	}
+	return node;
+}
+
+void AVL::remove(string number) {
+	//calls remove node function
+	root = removeNode(root,number);
+
+	if (successfulDeletion)
+		cout << "successful" << endl;
+	else
+		cout << "unsuccessful" << endl;
+
+}
+
+//Cite: PPT Slides Trees Module
+Node* AVL::removeNode(Node* node, string number) {
+
+	if (node == nullptr) {
+		return node;
+	}
+
+	//item less than data at node
+	if (number < node->ID) {
+		node->left = removeNode(node->left,number);
+	}
+		//item greater than data at node
+	else if (number > node->ID) {
+		node->right = removeNode(node->right, number);
+	}
+		//item is in the node
+	else {
+		//will be deleted in one of three ways
+		successfulDeletion = true;
+
+		//no children- left and right null
+		if (node->left == nullptr && node->right == nullptr) {
+			delete node;
+			node = nullptr;
+		}
+			//one child in right
+		else if (!node->left) {
+			Node* item = node;
+			node = node->right;
+			delete item;
+		}
+			//one child in left
+		else if (!node->right) {
+			Node* item = node;
+			node = node->left;
+			delete item;
+		}
+			//two children
+		else {
+			Node* item = inorderSuccessor(node->right);
+			//save the contents of inorder successor to node
+			node->ID = item->ID;
+			node->nameID = item->nameID;
+			node->right = removeNode(node->right,item->ID);
+		}
+	}
+	return node;
+}
+
+Node* AVL::inorderSuccessor(Node* node) {
+	Node* curr = node;
+
+	while (curr->left != nullptr) {
+		//leftmost node of right subtree
+		curr = curr->left;
+	}
+	return curr;
+}
+
+void AVL::removeInOrderN(int n) {
+	//save inorder traversal of tree in vector
+	//call removeNode function at index n
+	vector<string> tree;
+	inOrder(root,tree);
+
+	//Nth node not an element in index
+	if (n >= tree.size())
+		cout << "unsuccessful" << endl;
+	else
+		remove(tree.at(n));
+
+}
+
+//Cite: Module 4 Solutions PDF 4.1b
+void AVL::inOrder(Node* node, vector<string>& tree) {
+	//traverses through tree inorder saving each value
+
+	if (node == nullptr) return;
+
+	if (node->left)
+		inOrder(node->left,tree);
+
+	tree.push_back(node->ID);
+
+	if (node->right)
+		inOrder(node->right,tree);
+}
+
+void AVL::searchID(string ID) {
+	string found = findID(ID,root);
+	//returns empty string if not found
+	if (found == "")
+		cout << "unsuccessful" << endl;
+	else
+		cout << found << endl;
+}
+string AVL::findID(string key,Node* node) {
+	Node* curr = node;
+	string ID;
+
+	if (curr == nullptr)
+		ID = "";
+	else if(key.compare(curr->ID) == 0)
+		ID = curr->nameID;
+	else if(key.compare(curr->ID) < 0)
+		ID = findID(key,curr->left);
+	else if(key.compare(curr->ID) > 0)
+		ID = findID(key,curr->right);
+
+	return ID;
+}
+
+void AVL::searchName(string name) {
+	//remove quotes before searching for name
+	string final = removeQuotes(name);
+
+	//create vector to store the IDs of those with same name
+	vector<string> s;
+	preOrder(final,root,s);
+
+	//no names matched
+	if (s.size() == 0) {
+		cout << "unsuccessful" << endl;
+	}
+	else {
+		for (int i = 0; i < s.size(); i++) {
+			cout << s.at(i) << endl;
+		}
+	}
+}
+
+//Cite: Module 4 Solutions PDF 4.1b
+//incorporate vector
+void AVL::preOrder(string name, Node* node,vector<string>& s) {
+
+	//traverse in preorder and push_back same name IDs
+	if (node == nullptr) return;
+
+	if (name.compare(node->nameID) == 0)
+		s.push_back(node->ID);
+	if (node->left)
+		preOrder(name,node->left,s);
+	if (node->right)
+		preOrder(name,node->right,s);
+
+}
+
+//Cite for Traversals:
+// https://ufl.instructure.com/courses/406617/files/folder/Fall%202020/Powerpoints/Aman%20Presentations?preview=52437722
+void AVL::printInorder(Node* node) {
+
+	if (node == nullptr)
+		cout << "";
+
+	else {
+		//print comma only if there is a left or right node
+		if (node->left != nullptr) {
+			printInorder(node->left);
+			cout << ", ";
+		}
+		cout << node->nameID;
+		if (node->right != nullptr) {
+			cout << ", ";
+			printInorder(node->right);
+		}
+	}
+
+}
+
+void AVL::printPreorder(Node* node) {
+	if (node == nullptr)
+		cout << "";
+	else {
+		cout << node->nameID;
+
+		if (node->left != nullptr) {
+			cout << ", ";
+			printPreorder(node->left);
+
+		}
+		if (node->right != nullptr) {
+			cout << ", ";
+			printPreorder(node->right);
+		}
+	}
+}
+
+void AVL::printPostorder(Node* node) {
+	//left, right, and root note for post order
+	if (node == nullptr)
+		cout << "";
+	else {
+		if (node->left != nullptr) {
+			printPostorder(node->left);
+			cout << ", ";
+		}
+		if (node->right != nullptr) {
+			printPostorder(node->right);
+			cout << ", ";
+		}
+		cout << node->nameID;
+	}
+}
+
+void AVL::printLevelCount(Node* node) {
+	//use height function to get level of node
+	cout << heightAtNode(node) << endl;
+}
+
+//ROTATIONS
+//Cite: https://stepik.org/submissions/1480367/299020677?unit=379728
+Node* AVL::rotateLeft(Node *node) {
+	Node* grandchild = node->right->left;
+	Node* newParent = node->right;
+
+	newParent->left = node;
+	node->right = grandchild;
+
+	return newParent;
+}
+
+//Cite: https://stepik.org/submissions/1480367/299020677?unit=379728
+Node* AVL::rotateRight(Node *node) {
+	Node* grandchild = node->left->right;
+	Node* newParent = node->left;
+	newParent->right = node;
+	node->left = grandchild;
+
+	return newParent;
+}
+
+//Cite: https://stepik.org/submissions/1480367/299020677?unit=379728
+Node* AVL::rotateLeftRight(Node *node) {
+	//left rotation with left node then call right rotation
+	node->left = rotateLeft(node->left);
+	return rotateRight(node);
+}
+
+//Cite: https://stepik.org/submissions/1480369/299057982?unit=379728
+Node* AVL::rotateRightLeft(Node *node) {
+	node->right = rotateRight(node->right);
+	return rotateLeft(node);
+}
+
+//Cite https://stepik.org/submissions/1590562/299504733?unit=400654
+int AVL::getBalanceFactor(Node* node) {
+	if (node == nullptr)
+		return 0;
+	//BF = height at left - height at right
+	return heightAtNode(node->left) - heightAtNode(node->right);
+}
+
+//Cite https://stepik.org/submissions/1590562/299504733?unit=400654
+int AVL::heightAtNode(Node* node) {
+	//return height
+	if (node == nullptr)
+		return 0;
+
+	return std::max(heightAtNode(node->left),heightAtNode(node->right)) + 1;
+}
+
+//Cite: Table Trees-3 Class PPT
+Node* AVL::balance(Node* node) {
+	int BF = getBalanceFactor(node);
+
+	//Right Right Case == Left Rotation
+	if (BF == -2 && getBalanceFactor(node->right) == -1) {
+		return rotateLeft(node);
+	}
+	//Left Left Case == Right Rotation
+	if (BF == 2 && getBalanceFactor(node->left) == 1) {
+		return rotateRight(node);
+	}
+	if (BF == -2 && getBalanceFactor(node->right) == 1) {
+		return rotateRightLeft(node);
+	}
+	if (BF == 2 && getBalanceFactor(node->left) == -1) {
+		return rotateLeftRight(node);
+	}
+	//does not need any rotation return back same node
+	return node;
+}
+
+bool AVL::checkName(string name) {
+	//name fits the regex standards
+	bool valid = true;
+	for (int i = 0; i < name.length(); ++i) {
+		//get the char for each element
+		char x = name[i];
+		//check if its either a letter or space
+		if (!isalpha(x) && !isspace(x))
+			valid = false;
+	}
+	return valid;
+}
+bool AVL::checkID(string number) {
+	return (number.length() == 8);
+}
+string AVL::removeQuotes(string name) {
+	return name.substr(1,name.length()-2);
+}
+
+void AVL::printIn() {
+	printInorder(root);
+}
+void AVL::printPre() {
+	printPreorder(root);
+}
+void AVL::printPost() {
+	printPostorder(root);
+}
+void AVL::printLevel() {
+	printLevelCount(root);
+}
+
+
+int main() {
+	AVL avl;
+
+	int numLines;
+	string commandKey;
+	string token;
+	string quotes = "\"";
+
+	//get the number of commands
+	cin >> numLines;
+	getline(cin,token);
+
+	while (numLines--) {
+		getline(cin,token);
+
+		//get first word which tells us the command
+		commandKey = token.substr(0,token.find(" "));
+
+		//several if statements to check specific command
+		if (commandKey == "insert") {
+			//position of both double quotes
+			int pos1 = token.find(quotes);
+			int pos2 = token.find(quotes,pos1+1);
+
+			avl.insert(token.substr(pos1,pos2-pos1 + 1),token.substr(pos2 + 2, token.length() - (pos2 + 2)));
+		}
+		else if (commandKey == "remove") {
+			string removeID = token.substr(token.find(" ") + 1,token.length() - token.find(" "));
+			avl.remove(removeID);
+		}
+		else if (commandKey == "search") {
+			//check if there are quotes to check whether name or ID was given
+			if (token.find(quotes) == -1) {
+				string ID = token.substr(token.find(" ") + 1,token.length() - token.find(" ") + 1);
+				avl.searchID(ID);
+			}
+			else {
+				int pos1 = token.find(quotes);
+				int pos2 = token.find(quotes,pos1+1);
+				string name = token.substr(pos1,pos2-pos1 + 1);
+				avl.searchName(name);
+			}
+		}
+		else if (commandKey == "printInorder") {
+			avl.printIn();
+			cout << endl;
+		}
+		else if (commandKey == "printPreorder") {
+			avl.printPre();
+			cout << endl;
+		}
+		else if (commandKey == "printPostorder") {
+			avl.printPost();
+			cout << endl;
+		}
+		else if (commandKey == "printLevelCount") {
+			avl.printLevel();
+		}
+		else if (commandKey == "removeInorder") {
+			string n = token.substr(token.find(" ") + 1,token.length() - token.find(" "));
+			int N = stoi(n);
+			avl.removeInOrderN(N);
+		}
+	}
+
+	return 0;
+}
