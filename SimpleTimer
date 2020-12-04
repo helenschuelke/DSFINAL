@@ -1,0 +1,29 @@
+#include <chrono>
+#include <string>
+
+using namespace std;
+using highResClock = std::chrono::high_resolution_clock;
+using timePoint = highResClock::time_point;
+
+//reusing this SimpleTimer class from my programming 2 class
+class SimpleTimer {
+	string message;
+	timePoint start;
+	timePoint stop;
+	std::chrono::duration<double> elapsed;
+
+public:
+	SimpleTimer(const char *msg);
+	~SimpleTimer();
+};
+
+SimpleTimer::SimpleTimer(const char *msg) {
+	message = msg;
+	start = highResClock::now();
+
+}
+SimpleTimer::~SimpleTimer() {
+	stop = highResClock::now();
+	elapsed = stop - start;
+	cout << message << elapsed.count() << endl;
+}
