@@ -1,0 +1,176 @@
+
+#include <iostream>
+#include <map>
+#include <unordered_map>
+#include <vector>
+#include <stdlib.h> 
+#include <fstream>
+#include <string>
+using namespace std;
+
+
+class GraphNode {
+private:
+	vector<int> inAdj;
+	vector<int> outAdj;
+	int key;
+public:
+	GraphNode(int val) {
+		key = val;
+	}
+	void AddIn(int val) {
+		inAdj.push_back(val);
+	}
+	void AddOut(int val) {
+		outAdj.push_back(val);
+	}
+	vector<int> GetOut() {
+		return outAdj;
+	}
+	vector<int> GetIn() {
+		return inAdj;
+	}
+	int NumOut() {
+		int out = outAdj.size();
+		return out;
+	}
+	int NumIn() {
+		int in = inAdj.size();
+		return in;
+	}
+	bool CheckEdgeOut(int key) {
+		for (int i = 0; i < outAdj.size(); i++) {
+			if (key == outAdj[i]) {
+				return true;
+			}
+		}
+		return false;
+	}
+};
+
+void AddEdge(int to, int from, GraphNode* toNode, GraphNode* fromNode) {
+	GraphNode* addV = fromNode;
+	addV->AddOut(to);
+
+	addV = toNode;
+	addV->AddIn(from);
+}
+
+void GenerateEdges(GraphNode* from, int total) {
+	
+	int randomNumber;
+	bool found;
+	for (int i = 0; i < 25; i++) {
+		do {
+			randomNumber = rand() % total;
+			found = from->CheckEdgeOut(randomNumber);
+		} while (found);
+	}
+
+
+}
+
+
+
+int main()
+{
+	map <int, pair<string, string>> keyMap; //get string pair from int key
+	map <pair<string, string>, int> backup; //get int key from string pair
+	vector<int> vertices; //record vertices
+
+	map<int, GraphNode*> adj;//record pointers to Adjacnecy List
+
+	map<int, double> PI;//Result from power iterations where int is the key and double is the result
+
+	int totalVertices = 0; //keep track of total vertices
+	int nextKey = 1; //keep track of individual keys
+
+
+	int no_of_lines = 10772;
+	string title, artist;
+
+	ifstream inFile;
+	inFile.open("graphdata.csv");
+	if (inFile.is_open())
+	{
+		string ignore;
+		getline(inFile, ignore);
+		while (!inFile.eof()) {
+			for (int i = 0; i < (no_of_lines / 2); i++) {
+				getline(inFile, title, ',');
+				getline(inFile, artist, ',');
+				pair<string, string> to = make_pair(title, artist);
+				keyMap[i] = to;
+				getline(inFile, title, ',');
+				getline(inFile, artist, ',');
+				pair<string, string> from = make_pair(title, artist);
+				keyMap[++i] = from;
+				
+				
+
+				
+
+		//Add to key map:
+
+		//Check to see if string is in keyMap:
+		bool fromExists = false;
+		bool toExists = false;
+
+		for (int i = 1; i <= totalVertices; i++) {
+			if (keyMap[i] == from) { //from is already a node
+				fromExists = true;
+			}
+			if (keyMap[i] == to) { //to is already a node
+				toExists = true;
+			}
+		}
+
+
+		//If not, add it:
+		if (fromExists == false) {
+			backup[from] = nextKey;
+			keyMap[nextKey] = from;
+			vertices.push_back(nextKey);
+
+			//New vertex means new adj list
+			GraphNode* temp = new GraphNode(nextKey);
+			adj[nextKey] = temp;
+
+			nextKey++;
+			totalVertices++;
+
+		}
+
+		if (toExists == false) {
+			backup[to] = nextKey;
+			keyMap[nextKey] = to;
+			vertices.push_back(nextKey);
+
+			//New vertex means new adj list
+			GraphNode* temp = new GraphNode(nextKey);
+			adj[nextKey] = temp;
+
+			nextKey++;
+			totalVertices++;
+
+		}
+
+		int f = find(backup.begin(), backup.end(), from)->second; //Grab the key associated with from
+		int t = find(backup.begin(), backup.end(), to)->second; //Grab the key associated with to
+
+		//Add to AdjacencyList
+		GraphNode* addV = adj[f];
+		addV->AddOut(t);
+
+		addV = adj[t];
+		addV->AddIn(f);
+
+	}
+
+	//Random edges:
+	//Total is 10772
+	for (int i = 0; i < totalVertices; i++) {
+		GenerateEdges(adj[i], totalVertices);
+	}
+
+}
