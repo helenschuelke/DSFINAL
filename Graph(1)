@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <map>
 #include <unordered_map>
@@ -6,8 +5,36 @@
 #include <stdlib.h> 
 #include <fstream>
 #include <string>
+#include <chrono>
+#include <stdio.h>
+#include <stdlib.h>
+#include<time.h>
 using namespace std;
+using highResClock = std::chrono::high_resolution_clock;
+using timePoint = highResClock::time_point;
 
+//Cite: Reusing Simple Timer class from Yelaine Linares
+class SimpleTimer {
+	string message;
+	timePoint start;
+	timePoint stop;
+	std::chrono::duration<double> elapsed;
+
+public:
+	SimpleTimer(const char *msg);
+	~SimpleTimer();
+};
+
+SimpleTimer::SimpleTimer(const char *msg) {
+	message = msg;
+	start = highResClock::now();
+
+}
+SimpleTimer::~SimpleTimer() {
+	stop = highResClock::now();
+	elapsed = stop - start;
+	cout << message << elapsed.count() << endl;
+}
 
 class GraphNode {
 private:
@@ -70,10 +97,19 @@ void GenerateEdges(GraphNode* from, int total) {
 
 }
 
-
+void LoadGraphFile([insert proper parameter for the pointers?]);
 
 int main()
 {
+	{
+		SimpleTimer timer("Graph Insertion: ");
+		LoadGraphFile(avl);
+	}
+	{
+		// Could maybe use DFS to traverse
+		SimpleTimer timer("Graph Traversal: ");
+		
+	}
 	map <int, pair<string, string>> keyMap; //get string pair from int key
 	map <pair<string, string>, int> backup; //get int key from string pair
 	vector<int> vertices; //record vertices
@@ -86,29 +122,7 @@ int main()
 	int nextKey = 1; //keep track of individual keys
 
 
-	int no_of_lines = 10772;
-	string title, artist;
-
-	ifstream inFile;
-	inFile.open("graphdata.csv");
-	if (inFile.is_open())
-	{
-		string ignore;
-		getline(inFile, ignore);
-		while (!inFile.eof()) {
-			for (int i = 0; i < (no_of_lines / 2); i++) {
-				getline(inFile, title, ',');
-				getline(inFile, artist, ',');
-				pair<string, string> to = make_pair(title, artist);
-				keyMap[i] = to;
-				getline(inFile, title, ',');
-				getline(inFile, artist, ',');
-				pair<string, string> from = make_pair(title, artist);
-				keyMap[++i] = from;
-				
-				
-
-				
+	
 
 		//Add to key map:
 
@@ -174,3 +188,35 @@ int main()
 	}
 
 }
+
+void LoadGraphFile([insert proper parameter for the pointers?]) {
+	int no_of_lines = 10772;
+	string title, artist;
+	ifstream inFile;
+	
+	inFile.open("graphdata.csv");
+	if (inFile.is_open())
+	{
+		string ignore;
+		getline(inFile, ignore);
+		while (!inFile.eof()) {
+			for (int i = 0; i < (no_of_lines / 2); i++) {
+				getline(inFile, title, ',');
+				getline(inFile, artist, ',');
+				pair<string, string> to = make_pair(title, artist);
+				keyMap[i] = to;
+				getline(inFile, title, ',');
+				getline(inFile, artist, ',');
+				pair<string, string> from = make_pair(title, artist);
+				keyMap[++i] = from;
+				
+
+
+
+
+
+
+
+
+}
+				
