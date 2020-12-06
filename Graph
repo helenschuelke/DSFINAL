@@ -72,8 +72,8 @@ void GenerateEdges(GraphNode* from, int total) {
 
 int main()
 {
-	map <int, string> keyMap; //get string from int key
-	map <string, int> backup; //get int key from string
+	map <int, pair<string, string> keyMap; //get string from int key
+	map <pair<string, string>, int> backup; //get int key from string
 	vector<int> vertices; //record vertices
 
 	map<int, GraphNode*> adj;//record pointers to Adjacnecy List
