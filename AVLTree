@@ -319,7 +319,7 @@ string AVL::findIndex(Node* node, string key) {
 	return s;
 }
 
-void LoadAVLFile(AVL avl);
+void LoadAVLFile(AVL& avl);
 int main() {
 	AVL avl;
 	{
@@ -341,7 +341,7 @@ int main() {
 	return 0;
 }
 
-void LoadAVLFile(AVL avl) {
+void LoadAVLFile(AVL& avl) {
 	ifstream inFile;
 	inFile.open("avldata.csv");
 
