@@ -4,12 +4,16 @@
 #include <chrono>
 #include <string>
 #include <vector>
+#include <set>
+#include <stdio.h>
+#include <stdlib.h>
+#include<time.h>
 
 using namespace std;
 using highResClock = std::chrono::high_resolution_clock;
 using timePoint = highResClock::time_point;
 
-//reusing this SimpleTimer class from my programming 2 class
+//Cite: Reusing Simple Timer class from my COP3502 project
 class SimpleTimer {
 	string message;
 	timePoint start;
@@ -32,7 +36,7 @@ SimpleTimer::~SimpleTimer() {
 	cout << message << elapsed.count() << endl;
 }
 
-
+//Cite: Yelaine Linares Project 1 AVL Code
 class Node {
 
 public:
@@ -49,6 +53,7 @@ public:
 class AVL {
 	//initialize root
 	Node* root = nullptr;
+	int numNodes;
 
 public:
 	//INSERT Functions
@@ -67,15 +72,19 @@ public:
 	Node* rotateRightLeft(Node *node);
 
 	//SEARCH Functions
-	void searchSong(string name);
-	void searchArtist(string artist);
-	void preOrderSong(string name, Node* node,vector<string>& s);
-	void preOrderArtist(string artist, Node* node,vector<string>& singers);
+	vector<string> searchSong(string name);
+	vector<string> searchArtist(string artist);
+	void preOrderSong(string name, Node* node,vector<string>& singers);
+	void preOrderArtist(string artist, Node* node,vector<string>& songs);
 
 	//PRINT Functions
-	void printIn();
-	void printInorder(Node* node);
-
+	void traversal();
+	void inorderTraversal(Node* node);
+	
+	//25 days of christmas song generator
+	vector<string> randomPlaylist();
+	string findIndex(Node* node, string index);
+	
 };
 
 void AVL::insert(string number, string name, string artist) {
@@ -87,7 +96,6 @@ Node* AVL::insertNode(Node* node, string number, string name, string artist) {
 	if (node == nullptr) {
 		return new Node(number,name,artist);
 	}
-
 	//rotate and balance nodes if necessary
 	if (number < node->index) {
 		node->left = insertNode(node->left, number, name, artist);
@@ -177,95 +185,139 @@ Node* AVL::rotateRightLeft(Node *node) {
 	return rotateLeft(node);
 }
 
-void AVL::searchSong(string name) {
-
-	//create vector to store the IDs of those with same name
-	vector<string> s;
-	preOrderSong(name,root,s);
+vector<string> AVL::searchSong(string name) {
+	//create vector to store the artists with the same song title
+	vector<string> singers;
+	preOrderSong(name,root,singers);
+	return singers;
 
 	//no songs matched
-	if (s.size() == 0) {
-		cout << "No match found!" << endl;
-	}
-	else {
-		for (int i = 0; i < s.size(); i++) {
-			cout << "Here are all the artists that sing this song: " << endl;
-			cout << s.at(i) << endl;
-		}
-	}
-}
+//	if (s.size() == 0) {
+//		cout << "No match found!" << endl;
+//	}
+//	else {
+//		for (int i = 0; i < s.size(); i++) {
+//			cout << "Here are all the artists that sing this song: " << endl;
+//			cout << s.at(i) << endl;
+//		}
+//	}
 
-void AVL::searchArtist(string artist) {
-	//create vector to store the IDs of those with same name
-	vector<string> singers;
-	preOrderArtist(artist,root,singers);
-
-	//no names matched
-	if (singers.size() == 0) {
-		cout << "No match found!" << endl;
-	}
-	else {
-		for (int i = 0; i < singers.size(); i++) {
-			cout << "This artist sings these holiday songs: " << endl;
-			cout << singers.at(i) << endl;
-		}
-	}
 }
 
 //Cite: Module 4 Solutions PDF 4.1b
 //incorporate vector
-void AVL::preOrderSong(string name, Node* node,vector<string>& s) {
+void AVL::preOrderSong(string name, Node* node,vector<string>& singers) {
 
-	//traverse in preOrder and push_back same song titles
+	//traverse in preOrder and push_back artists that sing same song title
 	if (node == nullptr) return;
 
 	if (name.compare(node->song.first) == 0)
-		s.push_back(node->song.second);
+		singers.push_back(node->song.second);
 	if (node->left)
-		preOrderSong(name,node->left,s);
+		preOrderSong(name,node->left,singers);
 	if (node->right)
-		preOrderSong(name,node->right,s);
+		preOrderSong(name,node->right,singers);
 
 }
 
-void AVL::preOrderArtist(string artist, Node* node,vector<string>& singers) {
+vector<string> AVL::searchArtist(string artist) {
+	//create vector to store the songs from the same artist
+	vector<string> songs;
+	preOrderArtist(artist,root,songs);
+	return songs;
 
+	//no names matched
+//	if (singers.size() == 0) {
+//		cout << "No match found!" << endl;
+//	}
+//	else {
+//		for (int i = 0; i < singers.size(); i++) {
+//			cout << "This artist sings these holiday songs: " << endl;
+//			cout << singers.at(i) << endl;
+//		}
+//	}
+
+}
+
+void AVL::preOrderArtist(string artist, Node* node,vector<string>& songs) {
 	//traverse in preOrder and push_back same song titles
 	if (node == nullptr) return;
 
 	if (artist.compare(node->song.second) == 0)
-		singers.push_back(node->song.first);
+		songs.push_back(node->song.first);
 	if (node->left)
-		preOrderArtist(artist,node->left,singers);
+		preOrderArtist(artist,node->left,songs);
 	if (node->right)
-		preOrderArtist(artist,node->right,singers);
+		preOrderArtist(artist,node->right,songs);
 
 }
 
-void AVL::printIn() {
-	printInorder(root);
+void AVL::traversal() {
+	inorderTraversal(root);
 }
-void AVL::printInorder(Node* node) {
+void AVL::inorderTraversal(Node* node) {
 
-	if (node == nullptr)
-		cout << "";
+//	if (node == nullptr)
+//		cout << "";
+//
+//	else {
+//		if (node->left != nullptr) {
+//			printInorder(node->left);
+//		}
+//		cout << "Song: " << node->song.first << endl;
+//		cout << "Artist: " << node->song.second << endl;
+//
+//		if (node->right != nullptr) {
+//			printInorder(node->right);
+//		}
+//	}
 
+	if (node == nullptr);
 	else {
-		//print comma only if there is a left or right node
 		if (node->left != nullptr) {
-			printInorder(node->left);
+			inorderTraversal(node->left);
 		}
-		cout << "Song: " << node->song.first << endl;
-		cout << "Artist: " << node->song.second << endl;
-
+		numNodes++;
 		if (node->right != nullptr) {
-			printInorder(node->right);
+			inorderTraversal(node->right);
 		}
 	}
-
 }
 
+vector<string> AVL::randomPlaylist() {
+	srand(time(0));
+	set<int> mySet;
+	int count = 0;
+	vector<string> playlist;
 
+	while (count < 25){
+		int randomNum = rand() % numNodes + 1;
+		if (mySet.find(randomNum) == mySet.end()) {
+			mySet.insert(randomNum);
+			count++;
+			playlist.push_back(findIndex(root,to_string(randomNum)));
+		}
+	}
+}
+string AVL::findIndex(Node* node, string key) {
+	Node* curr = node;
+	string s;
+	string title, artist;
+
+	if (curr == nullptr)
+		s = "";
+	else if(key.compare(curr->index) == 0) {
+		title = curr->song.first;
+		artist = curr->song.second;
+		s = title + " by " + artist;
+	}
+	else if(key.compare(curr->index) < 0)
+		s = findIndex(curr->left, key);
+	else if(key.compare(curr->index) > 0)
+		s = findIndex(curr->right, key);
+
+	return s;
+}
 
 void LoadAVLFile(AVL avl);
 int main() {
@@ -277,6 +329,12 @@ int main() {
 		//Node is going to have an index, pair<string,string> song, artist
 		LoadAVLFile(avl);
 	}
+	{
+		SimpleTimer timer("AVL Traversal: ");
+		avl.traversal();
+	}
+	
+	
 
 
 
