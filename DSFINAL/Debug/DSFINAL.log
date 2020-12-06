@@ -1,3 +1,5 @@
 ﻿  Menu.cpp
-C:\Users\helen\source\repos\DSFINAL\DSFINAL\Menu.cpp(96,24): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\helen\source\repos\DSFINAL\DSFINAL\Menu.cpp(141,25): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\helen\source\repos\DSFINAL\DSFINAL\Menu.cpp(357,20): warning C4018: '<': signed/unsigned mismatch
+C:\Users\helen\source\repos\DSFINAL\DSFINAL\Menu.cpp(366,25): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
   DSFINAL.vcxproj -> C:\Users\helen\source\repos\DSFINAL\Debug\DSFINAL.exe

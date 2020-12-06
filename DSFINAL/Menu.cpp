@@ -2,9 +2,30 @@
 Menu::Menu(sf::RenderWindow* win)
 {
 	window = win;
+	
+	{
+		SimpleTimer timer("AVL Insertion: ");
+		//read in the file
+		//insert all the nodes
+		//Node is going to have an index, pair<string,string> song, artist
+		LoadAVLFile(avl);
+	}
+	{
+		SimpleTimer timer("AVL Traversal: ");
+		avl.traversal();
+	}
+
+	{
+		SimpleTimer timer("Graph Insertion: ");
+		//read in the file
+		//insert all the nodes
+		//Node is going to have an index, pair<string,string> song, artist
+		graph.ReadFiles();
+	}
 };
 
 void Menu::Initialize() {
+	display = avl.randomPlaylist();
 	songmas = true;
 	artist = false;
 	song = false;
@@ -12,7 +33,9 @@ void Menu::Initialize() {
 	Background();
 	GetButtons();
 	SongmasOn();
-	PrintSongs();
+	//vector<string>random = avl.randomPlaylist();
+	PrintSongs(display);
+	//PrintSongs(data.ReturnSongs());
 	window->display();
 	
 	
@@ -26,9 +49,9 @@ void Menu::Background() {
 	
 	
 	
-	jj.setPosition(207, 20);
-	jb.setPosition(210, 22);
-	song.setPosition(40, 200);
+	jj.setPosition(377, 40);
+	jb.setPosition(380, 42);
+	song.setPosition(60, 240);
 	
 	
 	
@@ -38,15 +61,32 @@ void Menu::Background() {
 	window->draw(jj);
 	window->draw(song);
 	
-	//window->draw(smallbox);
-	
-	
-	
-	
-	
-	
-	
+	//window->draw(smallbox);	
 
+}
+
+void Menu::LightUpGreen() {
+	
+	if (artist) {
+		sf::Sprite artistb(TextureManager::GetTexture("searchbyartistb"));
+		sf::Sprite artistg(TextureManager::GetTexture("searchbyartistg"));
+
+		artistg.setPosition(899, 319);
+		artistb.setPosition(901, 321);
+
+		window->draw(artistb);
+		window->draw(artistg);
+	}
+	if (song) {
+		sf::Sprite songb(TextureManager::GetTexture("searchbysong"));
+		sf::Sprite songg(TextureManager::GetTexture("searchbysongg"));
+
+		songg.setPosition(900, 249);
+		songb.setPosition(902, 251);
+
+		window->draw(songb);
+		window->draw(songg);
+	}
 }
 
 void Menu::Update() {
@@ -54,27 +94,32 @@ void Menu::Update() {
 	GetButtons();
 	if (songmas) {
 		SongmasOn();
-		PrintSongs();
+		PrintSongs(avl.randomPlaylist());
 	}
 	if (artist) {
 		ArtistOn();
+		GetText();
+		PrintList(songs);
 	}
 	if (song) {
 		SongOn();
+		GetText();
+		PrintList(artists);
 	}
+	void LightUpGreen();
 	window->display();
 
 };
 
-void Menu::PrintSongs() {
+void Menu::PrintSongs(vector<string>songs) {
 	sf::Text text;
 	sf::Font font;
 	if (!font.loadFromFile("Arial.ttf"))
 	{
 		cout << "error loading font" << endl;
 	}
-	vector<string> songs= data.ReturnSongs();
-	double height = 285;
+	//vector<string> songs= data.ReturnSongs();
+	double height = 325;
 	int count = 1;
 	for (int i = 0; i < 25; i++) {
 		string toAdd;
@@ -93,7 +138,7 @@ void Menu::PrintSongs() {
 		text.setFont(font);
 		text.setCharacterSize(20);
 		text.setFillColor(sf::Color::Black);
-		text.setPosition(75, height);
+		text.setPosition(105, height);
 		height += 16.5;
 		window->draw(text);
 		count++;
@@ -105,25 +150,107 @@ void Menu::ClickButton(sf::Vector2f mouseClick) {
 	for (; iter != buttons.end(); ++iter) {
 		auto rectangle = iter->second.getGlobalBounds();
 		if (rectangle.contains(mouseClick)) {
-				cout << "found it" << endl;
+				//cout << "found it" << endl;
 			if (iter->first == "searchbysong") {
+				display.clear();
+				display = avl.randomPlaylist();
 				songmas = false;
 				artist = false;
 				song = true;
+				currentText.clear();
+				artists.clear();
 
 			}
 			else if (iter->first == "searchbyartist") {
 				songmas = false;
 				artist = true;
 				song = false;
+				currentText.clear();
+				songs.clear();
 			}
 			else if (iter->first == "newsongs") {
 				songmas = true;
 				artist = false;
 				song = false;
+				currentText.clear();
+			}
+			
+			if (iter->first == "avl") {
+				
+				if (song) {
+					//cout << "song was true" << endl;
+					//cout << currentText << endl;
+					{
+						SimpleTimer timer("AVL Search for Artists: ");
+						artists = avl.searchSong(currentText);
+					}
+					if (artists.size() == 0) {
+						artists.push_back("No Matches");
+					}
+					PrintList(artists);
+				}
+				if (artist) {
+					//cout << "artist was true" << endl;
+					{
+						SimpleTimer timer("AVL Search for Songs: ");
+						songs = avl.searchArtist(currentText);
+					}
+					if (songs.size() == 0) {
+						songs.push_back("No Matches");
+					}
+					PrintList(songs);
+				}
+				
+			}
+			else if (iter->first == "graph") {
+				if (song) {
+					//cout << "song was true" << endl;
+					//cout << currentText << endl;
+					{
+						SimpleTimer timer("Graph Search for Artists: ");
+						artists = graph.BySong(currentText);
+					}
+					if (artists.size() == 0) {
+						artists.push_back("No Matches");
+					}
+					PrintList(artists);
+				}
+				if (artist) {
+					//cout << "artist was true" << endl;
+					{
+						SimpleTimer timer("Graph Search for Songs: ");
+						songs = graph.ByArtist(currentText);
+					}
+					if (songs.size() == 0) {
+						songs.push_back("No Matches");
+					}
+					PrintList(songs);
+				}
 			}
 		}
 	}
+}
+
+void Menu::AddText(string add) {
+	
+	currentText += add;
+}
+
+void Menu::GetText() {
+	sf::Text input;
+	sf::Font font;
+	if (!font.loadFromFile("Arial.ttf"))
+	{
+		cout << "error loading font" << endl;
+	}
+
+	input.setString(currentText);
+	input.setPosition(850, 530);
+	input.setFont(font);
+	input.setCharacterSize(20);
+	input.setFillColor(sf::Color::Black);
+
+	window->draw(input);
 }
 
 void Menu::GetButtons() {
@@ -139,18 +266,18 @@ void Menu::GetButtons() {
 
 	
 
-	button.setPosition(610, 200);
-	songr.setPosition(642, 209);
-	songb.setPosition(644, 211);
-	artistr.setPosition(639, 279);
-	artistb.setPosition(641, 281);
-	newsongsr.setPosition(667, 349);
-	newsongsb.setPosition(669, 351);
+	button.setPosition(870, 240);
+	songr.setPosition(900, 249);
+	songb.setPosition(902, 251);
+	artistr.setPosition(899, 319);
+	artistb.setPosition(901, 321);
+	newsongsr.setPosition(927, 389);
+	newsongsb.setPosition(929, 391);
 
 	window->draw(button);
-	button2.setPosition(610, 270);
+	button2.setPosition(870, 310);
 	window->draw(button2);
-	button3.setPosition(610, 340);
+	button3.setPosition(870, 380);
 	window->draw(button3);
 
 	window->draw(songb);
@@ -169,23 +296,141 @@ void Menu::SongmasOn() {
 	sf::Sprite allb(TextureManager::GetTexture("songmasb"));
 	sf::Sprite allf(TextureManager::GetTexture("songmas"));
 
-	allf.setPosition(125, 240);
-	allb.setPosition(127, 241);
+	allf.setPosition(245, 280);
+	allb.setPosition(247, 281);
 
 	window->draw(allb);
 	window->draw(allf);
+
+	//vector<string>random = avl.randomPlaylist();
+	//PrintSongs(random);
+
+}
+
+void Menu::TextBox() {
+	sf::Sprite smallbox(TextureManager::GetTexture("small_square"));
+	sf::Sprite avlr(TextureManager::GetTexture("avl"));
+	sf::Sprite avlb(TextureManager::GetTexture("avlb"));
+	sf::Sprite graphr(TextureManager::GetTexture("graphr"));
+	sf::Sprite graphb(TextureManager::GetTexture("graphb"));
+	sf::Sprite search(TextureManager::GetTexture("search"));
+	sf::Sprite search2(TextureManager::GetTexture("search2"));
+
+	smallbox.setPosition(800, 490);
+
+	search.setPosition(860, 680);
+
+	search2.setPosition(1040, 680);
+
+	avlr.setPosition(875, 695);
+	avlb.setPosition(876, 696);
+
+	graphr.setPosition(1047, 695);
+	graphb.setPosition(1048, 696);
+	window->draw(smallbox);
+	
+	window->draw(search);
+	window->draw(search2);
+
+	window->draw(avlb);
+	window->draw(avlr);
+
+	window->draw(graphb);
+	window->draw(graphr);
+
+	buttons.emplace("avl", search);
+	buttons.emplace("graph", search2);
+
+}
+
+void Menu::PrintList(vector<string>list) {
+	//cout << "print list" << endl;
+	//cout << list.size() << endl;
+	sf::Text text;
+	sf::Font font;
+	if (!font.loadFromFile("Arial.ttf"))
+	{
+		cout << "error loading font" << endl;
+	}
+	//vector<string> songs = data.ReturnSongs();
+	double height = 325;
+	for (int i = 0; i < list.size(); i++) {
+		string toAdd;
+		
+		toAdd = list[i];
+		//cout << list[i] << endl;
+		text.setString(toAdd);
+		text.setFont(font);
+		text.setCharacterSize(20);
+		text.setFillColor(sf::Color::Black);
+		text.setPosition(105, height);
+		height += 16.5;
+		window->draw(text);
+	}
+
+	
 }
 
 void Menu::ArtistOn() {
-	sf::Sprite smallbox(TextureManager::GetTexture("small_square"));
-	smallbox.setPosition(540, 180);
-	smallbox.setPosition(540, 450);
-	window->draw(smallbox);
+	TextBox();
+	sf::Sprite sr(TextureManager::GetTexture("songsbyartistr"));
+	sf::Sprite sb(TextureManager::GetTexture("songsbyartistb"));
+
+	sr.setPosition(125, 280);
+	sb.setPosition(127, 281);
+
+	window->draw(sb);
+	window->draw(sr);
+	
+	
 }
 
 void Menu::SongOn() {
-	sf::Sprite smallbox(TextureManager::GetTexture("small_square"));
-	smallbox.setPosition(540, 180);
-	smallbox.setPosition(540, 450);
-	window->draw(smallbox);
+	TextBox();
+	sf::Sprite ar(TextureManager::GetTexture("artiststhatsingthissongr"));
+	sf::Sprite ab(TextureManager::GetTexture("artiststhatsingthissongb"));
+
+	ar.setPosition(120, 280);
+	ab.setPosition(122, 281);
+
+	window->draw(ab);
+	window->draw(ar);
+
+	
+}
+
+bool Menu::CheckSongmas() {
+	return songmas;
+}
+
+bool Menu::CheckArtist() {
+	return artist;
+}
+
+bool Menu::CheckSong() {
+	return song;
+}
+
+void Menu::LoadAVLFile(AVL& avl) {
+	ifstream inFile;
+	inFile.open("avldata.csv");
+
+	string lineFromFile;
+	//header
+	getline(inFile, lineFromFile);
+	int count = 0;
+	while (getline(inFile, lineFromFile)) {
+		count++;
+		istringstream line(lineFromFile);
+		string index;
+		string title;
+		string artist;
+
+		getline(line, index, ',');
+		getline(line, title, ',');
+		getline(line, artist, ',');
+
+		avl.insert(index, title, artist);
+	}
+	//cout << count << endl;
 }
