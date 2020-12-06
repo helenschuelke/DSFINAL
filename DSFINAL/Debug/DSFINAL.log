@@ -1,0 +1,3 @@
+﻿  Menu.cpp
+C:\Users\helen\source\repos\DSFINAL\DSFINAL\Menu.cpp(96,24): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+  DSFINAL.vcxproj -> C:\Users\helen\source\repos\DSFINAL\Debug\DSFINAL.exe
