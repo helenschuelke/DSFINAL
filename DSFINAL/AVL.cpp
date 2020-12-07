@@ -1,4 +1,6 @@
 #include "AVL.h"
+//Cite: Yelaine Linares Project 1 AVL Code
+
 void AVL::insert(string number, string name, string artist) {
 	root = insertNode(root, number, name, artist);
 }
