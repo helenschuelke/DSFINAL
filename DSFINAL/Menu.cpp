@@ -10,10 +10,6 @@ Menu::Menu(sf::RenderWindow* win)
 		//Node is going to have an index, pair<string,string> song, artist
 		LoadAVLFile(avl);
 	}
-	{
-		SimpleTimer timer("AVL Traversal: ");
-		avl.traversal();
-	}
 
 	{
 		SimpleTimer timer("Graph Insertion: ");
@@ -24,6 +20,7 @@ Menu::Menu(sf::RenderWindow* win)
 	}
 };
 
+//Initializes menu
 void Menu::Initialize() {
 	display = avl.randomPlaylist();
 	songmas = true;
@@ -33,14 +30,13 @@ void Menu::Initialize() {
 	Background();
 	GetButtons();
 	SongmasOn();
-	//vector<string>random = avl.randomPlaylist();
 	PrintSongs(display);
-	//PrintSongs(data.ReturnSongs());
 	window->display();
 	
 	
 };
 
+//Initializes background
 void Menu::Background() {
 	sf::Sprite red(TextureManager::GetTexture("checkers"));
 	sf::Sprite jj(TextureManager::GetTexture("jinglejunkies"));
@@ -59,12 +55,11 @@ void Menu::Background() {
 	window->draw(red);
 	window->draw(jb);
 	window->draw(jj);
-	window->draw(song);
-	
-	//window->draw(smallbox);	
+	window->draw(song);	
 
 }
 
+//Change buttons green when clicked
 void Menu::LightUpGreen() {
 	
 	if (artist) {
@@ -89,6 +84,7 @@ void Menu::LightUpGreen() {
 	}
 }
 
+//Update displayed menu
 void Menu::Update() {
 	Background();
 	GetButtons();
@@ -111,6 +107,7 @@ void Menu::Update() {
 
 };
 
+//Prints songs (numbered up to 25)
 void Menu::PrintSongs(vector<string>songs) {
 	sf::Text text;
 	sf::Font font;
@@ -145,13 +142,14 @@ void Menu::PrintSongs(vector<string>songs) {
 	}
 }
 
+//Used with mouse click event
 void Menu::ClickButton(sf::Vector2f mouseClick) {
 	auto iter = buttons.begin();
 	for (; iter != buttons.end(); ++iter) {
 		auto rectangle = iter->second.getGlobalBounds();
 		if (rectangle.contains(mouseClick)) {
-				//cout << "found it" << endl;
-			if (iter->first == "searchbysong") {
+				
+			if (iter->first == "searchbysong") {//Search by Song is pressed
 				display.clear();
 				display = avl.randomPlaylist();
 				songmas = false;
@@ -161,25 +159,24 @@ void Menu::ClickButton(sf::Vector2f mouseClick) {
 				artists.clear();
 
 			}
-			else if (iter->first == "searchbyartist") {
+			else if (iter->first == "searchbyartist") {//Search by artist is pressed
 				songmas = false;
 				artist = true;
 				song = false;
 				currentText.clear();
 				songs.clear();
 			}
-			else if (iter->first == "newsongs") {
+			else if (iter->first == "newsongs") {//New Songs! is pressed
 				songmas = true;
 				artist = false;
 				song = false;
 				currentText.clear();
 			}
 			
-			if (iter->first == "avl") {
+			if (iter->first == "avl") {//Search AVL tree
 				
-				if (song) {
-					//cout << "song was true" << endl;
-					//cout << currentText << endl;
+				if (song) {//AVL search for artists along with time
+
 					{
 						SimpleTimer timer("AVL Search for Artists: ");
 						artists = avl.searchSong(currentText);
@@ -189,8 +186,8 @@ void Menu::ClickButton(sf::Vector2f mouseClick) {
 					}
 					PrintList(artists);
 				}
-				if (artist) {
-					//cout << "artist was true" << endl;
+				if (artist) {//AVL search for songs along with time
+
 					{
 						SimpleTimer timer("AVL Search for Songs: ");
 						songs = avl.searchArtist(currentText);
@@ -202,10 +199,8 @@ void Menu::ClickButton(sf::Vector2f mouseClick) {
 				}
 				
 			}
-			else if (iter->first == "graph") {
-				if (song) {
-					//cout << "song was true" << endl;
-					//cout << currentText << endl;
+			else if (iter->first == "graph") {//Search Graph
+				if (song) {//Graph search along with time
 					{
 						SimpleTimer timer("Graph Search for Artists: ");
 						artists = graph.BySong(currentText);
@@ -215,8 +210,7 @@ void Menu::ClickButton(sf::Vector2f mouseClick) {
 					}
 					PrintList(artists);
 				}
-				if (artist) {
-					//cout << "artist was true" << endl;
+				if (artist) {//Artist search along with time
 					{
 						SimpleTimer timer("Graph Search for Songs: ");
 						songs = graph.ByArtist(currentText);
@@ -231,11 +225,13 @@ void Menu::ClickButton(sf::Vector2f mouseClick) {
 	}
 }
 
+//Updates text input by user
 void Menu::AddText(string add) {
 	
 	currentText += add;
 }
 
+//Prints text from user
 void Menu::GetText() {
 	sf::Text input;
 	sf::Font font;
@@ -253,6 +249,7 @@ void Menu::GetText() {
 	window->draw(input);
 }
 
+//Prints button options and stores them for later use
 void Menu::GetButtons() {
 	sf::Sprite songb(TextureManager::GetTexture("searchbysong"));
 	sf::Sprite songr(TextureManager::GetTexture("searchbysongr"));
@@ -292,6 +289,7 @@ void Menu::GetButtons() {
 	buttons.emplace("newsongs", button3);
 }
 
+//Event when New Songs! is pressed
 void Menu::SongmasOn() {
 	sf::Sprite allb(TextureManager::GetTexture("songmasb"));
 	sf::Sprite allf(TextureManager::GetTexture("songmas"));
@@ -307,6 +305,7 @@ void Menu::SongmasOn() {
 
 }
 
+//displays text box when Search by Song or Search by Artist is pressed
 void Menu::TextBox() {
 	sf::Sprite smallbox(TextureManager::GetTexture("small_square"));
 	sf::Sprite avlr(TextureManager::GetTexture("avl"));
@@ -343,22 +342,19 @@ void Menu::TextBox() {
 
 }
 
+//Prints a list (used to print songs and artists when searched)
 void Menu::PrintList(vector<string>list) {
-	//cout << "print list" << endl;
-	//cout << list.size() << endl;
 	sf::Text text;
 	sf::Font font;
 	if (!font.loadFromFile("Arial.ttf"))
 	{
 		cout << "error loading font" << endl;
 	}
-	//vector<string> songs = data.ReturnSongs();
 	double height = 325;
 	for (int i = 0; i < list.size(); i++) {
 		string toAdd;
 		
 		toAdd = list[i];
-		//cout << list[i] << endl;
 		text.setString(toAdd);
 		text.setFont(font);
 		text.setCharacterSize(20);
@@ -371,6 +367,7 @@ void Menu::PrintList(vector<string>list) {
 	
 }
 
+//Used when Search by Artist is pressed
 void Menu::ArtistOn() {
 	TextBox();
 	sf::Sprite sr(TextureManager::GetTexture("songsbyartistr"));
@@ -385,6 +382,7 @@ void Menu::ArtistOn() {
 	
 }
 
+//Used when Search by Song is pressed
 void Menu::SongOn() {
 	TextBox();
 	sf::Sprite ar(TextureManager::GetTexture("artiststhatsingthissongr"));
@@ -411,6 +409,7 @@ bool Menu::CheckSong() {
 	return song;
 }
 
+//Loads AVL file
 void Menu::LoadAVLFile(AVL& avl) {
 	ifstream inFile;
 	inFile.open("avldata.csv");
@@ -432,5 +431,5 @@ void Menu::LoadAVLFile(AVL& avl) {
 
 		avl.insert(index, title, artist);
 	}
-	//cout << count << endl;
+	
 }
