@@ -9,7 +9,7 @@
 #include <sstream>
 using namespace std;
 
-
+//Parts of Graph come from Helen Schuelke COP3530 Project 2
 class GraphNode {
 private:
 	vector<int> inAdj;
@@ -39,20 +39,6 @@ public:
 		int in = inAdj.size();
 		return in;
 	}
-	bool CheckEdgeOut(int find) {
-		/*
-		for (int i = 0; i < NumOut(); i++) {
-			/*
-			if (find == outAdj[i]) {
-				return true;
-			}
-
-			cout << "hi" << endl;
-		}
-	*/
-
-		return false;
-	}
 };
 
 class Graph {
@@ -73,5 +59,4 @@ public:
 	vector<string> BySong(string song);
 	vector<string> ByArtist(string artist);
 	void ReadFiles();
-	void Trial();
 };
