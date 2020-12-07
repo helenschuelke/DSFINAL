@@ -50,7 +50,6 @@ int main()
 				{
 					sf::Vector2i position = sf::Mouse::getPosition(window);
 					sf::Vector2f fposition(position.x, position.y);
-					//cout << "Position.x = " << position.x << " Position.y = " << position.y << endl;
 					m.ClickButton(fposition);
 					m.Update();
 
@@ -60,8 +59,6 @@ int main()
 
 					sf::Vector2i position = sf::Mouse::getPosition(window);
 					sf::Vector2f fposition(position.x, position.y);
-					
-					//m.Update();
 				}
 				
 			}
