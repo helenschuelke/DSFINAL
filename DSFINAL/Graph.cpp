@@ -1,4 +1,6 @@
 #include "Graph.h"
+
+//Adds an edge to the graph
 void Graph::AddEdge(int to, int from, GraphNode* toNode, GraphNode* fromNode) {
 	GraphNode* addV = fromNode;
 	addV->AddOut(to);
@@ -7,6 +9,7 @@ void Graph::AddEdge(int to, int from, GraphNode* toNode, GraphNode* fromNode) {
 	addV->AddIn(from);
 }
 
+//Used to randomly make edges
 vector<int> Graph::GenerateEdges(GraphNode* from, int total) {
 	vector<int> edges;
 	int randomNumber;
@@ -14,31 +17,23 @@ vector<int> Graph::GenerateEdges(GraphNode* from, int total) {
 	for (int i = 0; i < 25; i++) {
 		do {
 			randomNumber = rand() % total + 1;
-			found = from->CheckEdgeOut(randomNumber);
 			vector<int> out = from->GetOut();
-			/*
-			for (int i = 1; i <= out.size(); i++) {
-				if (out[i] == randomNumber) {
-					found = true;
-				}
-			}
-			*/
+			
 		} while (found);
-		//edges.push_back(randomNumber);
+		
 	}
 
 	return edges;
 }
 
+//Enter song and returns vector of all artists who sang it
 vector<string> Graph::BySong(string song) {
 	vector<string> artists;
-	//cout << "by song" << endl;
 	auto it = keyMap.begin();
 
 	while (it != keyMap.end()) {
 		if (it->second.first == song) {
 			string foundIt = it->second.second;
-			//cout << foundIt << endl;
 			artists.push_back(foundIt);
 		}
 		it++;
@@ -46,7 +41,7 @@ vector<string> Graph::BySong(string song) {
 
 	return artists;
 }
-
+//Enter artists and returns vector of all songs they have sang
 vector<string> Graph::ByArtist(string artist) {
 	vector<string> songs;
 
@@ -55,7 +50,6 @@ vector<string> Graph::ByArtist(string artist) {
 	while (it != keyMap.end()) {
 		if (it->second.second == artist) {
 			string foundIt = it->second.first;
-			//cout << foundIt << endl;
 			songs.push_back(foundIt);
 		}
 		it++;
@@ -73,7 +67,6 @@ void Graph::ReadFiles() {
 	inFile.open("graphdata.csv");//open data
 	if (inFile.is_open())
 	{
-		//cout << "open" << endl;
 		string ignore;
 		string lineFromFile;
 		getline(inFile, ignore);
@@ -97,30 +90,11 @@ void Graph::ReadFiles() {
 			totalVertices++;
 
 			//link the node with the last node
-			//count % 2 == 0 &&
 			if (count > 1) {
 				AddEdge((count - 1), count, adj[count - 1], tempNode);
 			}
 
 		}
-
-		//Random edges:
-		//Total is 10772
-		/*
-		for (int i = 0; i < totalVertices; i++) {
-			vector<int> rEdges;
-			rEdges = GenerateEdges(adj[i], totalVertices);
-			/*
-			for (int j = 0; j < rEdges.size(); j++) {
-				AddEdge(rEdges[j], i, adj[rEdges[j]], adj[j]);
-			}
-
-
-
-		}
-*/
-
-
 
 
 	}
