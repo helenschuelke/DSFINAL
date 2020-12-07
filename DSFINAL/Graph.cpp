@@ -1,8 +1,4 @@
 #include "Graph.h"
-void Graph::Trial() {
-	//cout << totalVertices << endl;
-}
-
 void Graph::AddEdge(int to, int from, GraphNode* toNode, GraphNode* fromNode) {
 	GraphNode* addV = fromNode;
 	addV->AddOut(to);
