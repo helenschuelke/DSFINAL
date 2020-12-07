@@ -166,38 +166,6 @@ void AVL::preOrderArtist(string artist, Node* node, vector<string>& songs) {
 
 }
 
-void AVL::traversal() {
-	inorderTraversal(root);
-}
-void AVL::inorderTraversal(Node* node) {
-
-	//	if (node == nullptr)
-	//		cout << "";
-	//
-	//	else {
-	//		if (node->left != nullptr) {
-	//			printInorder(node->left);
-	//		}
-	//		cout << "Song: " << node->song.first << endl;
-	//		cout << "Artist: " << node->song.second << endl;
-	//
-	//		if (node->right != nullptr) {
-	//			printInorder(node->right);
-	//		}
-	//	}
-
-	if (node == nullptr);
-	else {
-		if (node->left != nullptr) {
-			inorderTraversal(node->left);
-		}
-		//numNodes++;
-		if (node->right != nullptr) {
-			inorderTraversal(node->right);
-		}
-	}
-}
-
 vector<string> AVL::randomPlaylist() {
 	srand(time(0));
 	set<int> mySet;
