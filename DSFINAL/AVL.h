@@ -54,10 +54,6 @@ public:
 	void preOrderSong(string name, Node* node, vector<string>& singers);
 	void preOrderArtist(string artist, Node* node, vector<string>& songs);
 
-	//PRINT Functions
-	void traversal();
-	void inorderTraversal(Node* node);
-
 	//25 days of christmas song generator
 	vector<string> randomPlaylist();
 	string findIndex(Node* node, string index);
